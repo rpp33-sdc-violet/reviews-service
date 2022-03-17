@@ -15,5 +15,12 @@
   "bugs": {
     "url": "https://github.com/rpp33-sdc-violet/reviews-service/issues"
   },
-  "homepage": "https://github.com/rpp33-sdc-violet/reviews-service#readme"
+  "homepage": "https://github.com/rpp33-sdc-violet/reviews-service#readme",
+  "dependencies": {
+    "express": "^4.17.3"
+  },
+  "devDependencies": {
+    "jest": "^27.5.1",
+    "supertest": "^6.2.2"
+  }
 }
