@@ -1,0 +1,19 @@
+{
+  "name": "reviews-service",
+  "version": "1.0.0",
+  "description": "Reviews API for Project Atelier",
+  "main": "server/index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rpp33-sdc-violet/reviews-service.git"
+  },
+  "author": "Joann Whang",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rpp33-sdc-violet/reviews-service/issues"
+  },
+  "homepage": "https://github.com/rpp33-sdc-violet/reviews-service#readme"
+}
