@@ -11,7 +11,7 @@ CREATE TABLE review (
   recommend BOOLEAN,
   response VARCHAR,
   body VARCHAR,
-  date TIMESTAMPTZ,
+  date VARCHAR,
   reviewer_name VARCHAR,
   helpfulness INT,
   email VARCHAR,
