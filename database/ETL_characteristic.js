@@ -17,6 +17,9 @@ const pool = new Pool({
 pool.connect((err, client, done) => {
   if (err) throw err;
 
+  // TRACK START OF ETL PROCESS
+  console.log('CHARACTERISTICS ETL PROCESS STARTED AT:', new Date().toString());
+
   const readable = fs.createReadStream('../../RPP33_General/SDC_data/characteristics.csv')
     .pipe(fastcsv.parse(csvOptions))
     .on('error', (error) => {
@@ -39,6 +42,8 @@ pool.connect((err, client, done) => {
     })
     .on('end', (rowCount) => {
       done();
-      console.log('finished ETL process - rowCount:', rowCount);
+      // TRACK COMPLETION OF ETL PROCESS
+      console.log('CHARACTERISTICS ETL PROCESS FINISHED AT:', new Date().toString());
+      console.log('CHARACTERISTICS ETL PROCESS FINISHED--rowCount:', rowCount);
     });
 });

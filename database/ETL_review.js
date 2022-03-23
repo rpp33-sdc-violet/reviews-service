@@ -60,6 +60,7 @@ pool.connect((err, client, done) => {
     })
     .on('end', (rowCount) => {
       done();
+      // TRACK COMPLETION OF ETL PROCESS
       console.log('REVIEWS ETL PROCESS FINISHED AT:', new Date().toString());
       console.log('REVIEWS ETL PROCESS FINISHED--rowCount:', rowCount);
     });
