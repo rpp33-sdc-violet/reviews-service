@@ -37,7 +37,6 @@ module.exports = {
   },
   report: {
     put: (req, res) => {
-      console.log('out here report');
       if (models.report.put() === 'reported') {
         res.send('success in PUT /reviews/:review_id/report');
       } else {

@@ -4,8 +4,8 @@
   "description": "Reviews API for Project Atelier",
   "main": "server/index.js",
   "scripts": {
-    "start": "nodemon index.js",
-    "test": "jest"
+    "start": "nodemon server/index.js",
+    "test": "jest --detectOpenHandles"
   },
   "repository": {
     "type": "git",
