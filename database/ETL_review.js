@@ -21,7 +21,7 @@ pool.connect((err, client, done) => {
   console.log('REVIEWS ETL PROCESS STARTED AT:', new Date().toString());
 
   // ETL PROCESS
-  const readable = fs.createReadStream('../../RPP33_General/SDC_data/reviews.csv')
+  const readable = fs.createReadStream('../SDC_data/reviews.csv')
     .pipe(fastcsv.parse(csvOptions))
     .on('error', (error) => {
       console.log(error);
