@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const controller = require('./controllers/index');
+const controller = require('../controllers/index');
 
 // Connect controller methods to their corresponding routes
 router.get('/', controller.reviews.get);
