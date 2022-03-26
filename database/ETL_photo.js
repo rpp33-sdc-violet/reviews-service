@@ -1,18 +1,8 @@
 const fs = require('fs');
-const { Pool } = require('pg');
 const fastcsv = require('fast-csv');
-require('dotenv').config();
+const pool = require('./index');
 
 const csvOptions = { headers: true };
-
-// create a new connection to the database
-const pool = new Pool({
-  host: process.env.PG_HOST,
-  user: process.env.PG_USER,
-  database: process.env.PG_DATABASE,
-  password: process.env.PG_PASSWORD,
-  port: process.env.PG_PORT,
-});
 
 pool.connect((err, client, done) => {
   if (err) throw err;

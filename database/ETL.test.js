@@ -67,7 +67,7 @@ describe('ETL process', () => {
     await client.connect();
     const res = await client.query('SELECT * FROM photo WHERE photo_id=1');
     await client.end();
-    console.log('HERE!:', res.rows);
+    // console.log('res.rows HERE:', res.rows);
     expect(res.rows[0].photo_id).toBe(1);
     expect(res.rows[0].url).toBe('https://images.unsplash.com/photo-1560570803-7474c0f9af99?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=975&q=80');
     expect(res.rows[0].review_id).toBe(5);
