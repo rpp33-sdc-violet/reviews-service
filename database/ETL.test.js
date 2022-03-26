@@ -5,7 +5,7 @@ jest.useRealTimers();
 
 describe('ETL process', () => {
   let client;
-  beforeEach(() => {
+  beforeEach(async () => {
     client = new Client({
       host: process.env.PG_HOST,
       user: process.env.PG_USER,
@@ -13,35 +13,33 @@ describe('ETL process', () => {
       password: process.env.PG_PASSWORD,
       port: process.env.PG_PORT,
     });
+
+    await client.connect();
+  });
+
+  afterEach(async () => {
+    await client.end();
   });
 
   it('Has 3347679 rows inserted in characteristic table', async () => {
-    await client.connect();
     const res = await client.query('SELECT COUNT(*) FROM characteristic');
-    await client.end();
     expect(res.rows[0].count).toBe('3347679');
   });
 
   it('Inserted data correctly in the characteristic table', async () => {
-    await client.connect();
     const res = await client.query('SELECT * FROM characteristic WHERE characteristic_id=1');
-    await client.end();
     expect(res.rows[0].characteristic_id).toBe(1);
     expect(res.rows[0].product_id).toBe(1);
     expect(res.rows[0].category).toBe('Fit');
   });
 
   it('Has 5774952 rows inserted in review table', async () => {
-    await client.connect();
     const res = await client.query('SELECT COUNT(*) FROM review');
-    await client.end();
     expect(res.rows[0].count).toBe('5774952');
   });
 
   it('Inserted data correctly in the review table', async () => {
-    await client.connect();
     const res = await client.query('SELECT * FROM review WHERE review_id=1');
-    await client.end();
     expect(res.rows[0].review_id).toBe(1);
     expect(res.rows[0].product_id).toBe(1);
     expect(res.rows[0].rating).toBe(5);
@@ -57,17 +55,12 @@ describe('ETL process', () => {
   });
 
   it('Has 2742540 rows inserted in photo table', async () => {
-    await client.connect();
     const res = await client.query('SELECT COUNT(*) FROM photo');
-    await client.end();
     expect(res.rows[0].count).toBe('2742540');
   });
 
   it('Inserted data correctly in the photo table', async () => {
-    await client.connect();
     const res = await client.query('SELECT * FROM photo WHERE photo_id=1');
-    await client.end();
-    // console.log('res.rows HERE:', res.rows);
     expect(res.rows[0].photo_id).toBe(1);
     expect(res.rows[0].url).toBe('https://images.unsplash.com/photo-1560570803-7474c0f9af99?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=975&q=80');
     expect(res.rows[0].review_id).toBe(5);
@@ -75,16 +68,12 @@ describe('ETL process', () => {
 
   it('Has 19327575 rows inserted in reviews_characteristics table', async () => {
     jest.setTimeout(10000); // increase timer for this test
-    await client.connect();
     const res = await client.query('SELECT COUNT(*) FROM reviews_characteristics');
-    await client.end();
     expect(res.rows[0].count).toBe('19327575');
   });
 
   it('Inserted data correctly in the reviews_characteristics table', async () => {
-    await client.connect();
     const res = await client.query('SELECT * FROM reviews_characteristics WHERE id=9');
-    await client.end();
     expect(res.rows[0].id).toBe(9);
     expect(res.rows[0].characteristic_id).toBe(5);
     expect(res.rows[0].review_id).toBe(3);
