@@ -3,11 +3,14 @@ const models = require('../models/index');
 module.exports = {
   reviews: {
     get: (req, res) => {
-      if (models.reviews.get() === 'all reviews data') {
-        res.send('success in GET /reviews');
-      } else {
-        res.status(500).send('error in GET /reviews');
-      }
+      models.reviews.get()
+        .then((data) => {
+          console.log('CONTROLLER GET DATA HERE', data);
+          res.send(data);
+        })
+        .catch((error) => {
+          res.status(500).send('error in GET /reviews');
+        });
     },
     post: (req, res) => {
       if (models.reviews.post() === 'reviews data posted') {
