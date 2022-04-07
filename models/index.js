@@ -19,7 +19,7 @@ module.exports = {
 
       const queryText = `
         SELECT json_build_object(
-        'product', ${productId},
+        'product', '${productId}',
         'page', ${page},
         'count', ${count},
         'results', (SELECT json_agg(row_to_json(allReviews)) 
@@ -37,7 +37,27 @@ module.exports = {
           OFFSET ${offset}
         ) AS allReviews))`;
 
-      pool.query(queryText, (err, res) => {
+      const queryText1 = `
+        SELECT json_build_object(
+        'product', '${productId}',
+        'page', ${page},
+        'count', ${count},
+        'results', (SELECT json_agg(row_to_json(allReviews)) 
+        FROM (
+          SELECT review_id, rating, summary, recommend, response, body, date, reviewer_name, helpfulness, reported,
+            (SELECT array_to_json(COALESCE (array_agg(row_to_json(allPhotos)), '{}'))
+              FROM (
+                SELECT photo_id AS id, url FROM photo WHERE review_id=review.review_id
+              ) allPhotos
+            ) AS photos  
+          FROM review 
+          WHERE product_id=${productId} AND reported=false
+          ORDER BY ${sortText}
+          LIMIT ${limit}
+          OFFSET ${offset}
+        ) AS allReviews))`;
+
+      pool.query(queryText1, (err, res) => {
         if (err) {
           callback(err);
         } else {

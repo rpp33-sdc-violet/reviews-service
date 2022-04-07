@@ -18,19 +18,44 @@ describe('GET /', () => {
 });
 
 describe('GET /reviews', () => {
-  let response;
-
-  beforeAll(async () => {
-    response = await request(app).get('/reviews');
+  it('should return reviews data based on specific query parameters', async () => {
+    const response = await request(app).get('/reviews?product_id=2&page=1&count=1&sort=relevant');
+    expect(response.status).toEqual(200);
+    expect(response.body.product).toEqual('2');
+    expect(response.body.page).toEqual(1);
+    expect(response.body.count).toEqual(1);
+    expect(response.body.results[0].review_id).toEqual(5);
+    expect(response.body.results[0].rating).toEqual(3);
+    expect(response.body.results[0].summary).toEqual("I'm enjoying wearing these shades");
+    expect(response.body.results[0].recommend).toEqual(true);
+    expect(response.body.results[0].response).toEqual(null);
+    expect(response.body.results[0].body).toEqual('Comfortable and practical.');
+    expect(response.body.results[0].date).toEqual('2021-03-17T13:28:37.620Z');
+    expect(response.body.results[0].reviewer_name).toEqual('shortandsweeet');
+    expect(response.body.results[0].helpfulness).toEqual(5);
+    expect(response.body.results[0].reported).toEqual(false);
+    expect(response.body.results[0].photos).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 1,
+          url: 'https://images.unsplash.com/photo-1560570803-7474c0f9af99?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=975&q=80',
+        }),
+        expect.objectContaining({
+          id: 2,
+          url: 'https://images.unsplash.com/photo-1561693532-9ff59442a7db?ixlib=rb-1.2.1&auto=format&fit=crop&w=975&q=80',
+        }),
+        expect.objectContaining({
+          id: 3,
+          url: 'https://images.unsplash.com/photo-1487349384428-12b47aca925e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1650&q=80',
+        }),
+      ]),
+    );
   });
-
-  it('should respond with a 200 status code', async () => {
-    expect(response.statusCode).toBe(200);
-  });
-
-  it('should respond with text: "success in GET /reviews"', () => {
-    expect(response.text).toBe('success in GET /reviews');
-  });
+  // test for photos null to be an empty array
+  // test for page 0 (default to 1)
+  // test for count/page defaults
+  // test that reported reviews doesn't show up
+  // test for errors
 });
 
 describe('POST /reviews', () => {
