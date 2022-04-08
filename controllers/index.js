@@ -26,11 +26,13 @@ module.exports = {
   },
   meta: {
     get: (req, res) => {
-      if (models.meta.get() === 'metadata here') {
-        res.send('success in GET /reviews/meta');
-      } else {
-        res.status(500).send('error in GET /reviews/meta');
-      }
+      models.meta.get((err, data) => {
+        if (err) {
+          res.status(500).send(err);
+        } else {
+          res.send(data);
+        }
+      });
     },
   },
   helpful: {
