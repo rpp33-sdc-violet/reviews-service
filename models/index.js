@@ -72,7 +72,7 @@ module.exports = {
       // hardcode data
       const productId = 2;
       // ratings: 2: 1, 3: 1, 4: 2, 5: 1,
-      // recommend: true: 3, false: 2
+      // recommend: false: 2, true: 3
       // characteristics:
 
       const queryText = `
@@ -83,7 +83,12 @@ module.exports = {
             FROM review
             WHERE product_id=${productId}
             GROUP BY rating 
-            ORDER BY rating) AS ratings)
+            ORDER BY rating) AS ratings),
+        'recommended', (SELECT json_object_agg(recommend, count)
+          FROM (SELECT review.recommend, COUNT(recommend)::text
+            FROM review
+            WHERE product_id=${productId}
+            GROUP BY recommend) AS recommended)
       )`;
 
       const queryRatings = `
@@ -96,10 +101,11 @@ module.exports = {
       `;
 
       const queryRecommended = `
-        SELECT COUNT(recommend)
+        SELECT json_object_agg(recommend, count)
+        FROM (SELECT review.recommend, COUNT(recommend)::text
           FROM review
           WHERE product_id=${productId}
-          GROUP
+          GROUP BY recommend) AS recommended
       `;
 
       pool.query(queryText, (err, res) => {
