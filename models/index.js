@@ -25,7 +25,7 @@ module.exports = {
         'results', (SELECT COALESCE(json_agg(row_to_json(allReviews)), '[]') 
         FROM (
           SELECT review_id, rating, summary, recommend, response, body, date, reviewer_name, helpfulness, reported,
-            (SELECT array_to_json(COALESCE (array_agg(row_to_json(allPhotos)), '{}'))
+            (SELECT COALESCE(array_to_json(array_agg(row_to_json(allPhotos))), '[]')
               FROM (
                 SELECT photo_id AS id, url FROM photo WHERE review_id=review.review_id
               ) allPhotos
@@ -41,7 +41,6 @@ module.exports = {
         if (err) {
           callback(err);
         } else {
-          console.log('HERE:', res.rows[0]);
           callback(null, res.rows[0].json_build_object);
         }
       });
@@ -56,9 +55,9 @@ module.exports = {
         ) AS reviews)`;
 
       const queryPhotosTEST = `
-        SELECT json_agg(row_to_json(photos))
+        SELECT COALESCE(json_agg(row_to_json(photos)), '[]')
         FROM (
-          SELECT photo_id, url FROM photo WHERE review_id=${5}
+          SELECT photo_id, url FROM photo WHERE review_id=${4} <-- or 5
         ) as photos`;
       */
     },
