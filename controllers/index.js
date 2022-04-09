@@ -26,7 +26,9 @@ module.exports = {
   },
   meta: {
     get: (req, res) => {
-      models.meta.get((err, data) => {
+      const productId = req.query.product_id;
+
+      models.meta.get(productId, (err, data) => {
         if (err) {
           res.status(500).send(err);
         } else {
