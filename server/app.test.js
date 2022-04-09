@@ -75,18 +75,10 @@ describe('POST /reviews', () => {
 });
 
 describe('GET /reviews/meta', () => {
-  let response;
+  it('should respond with text: "success in GET /reviews/meta"', async () => {
+    const response = await request(app).get('/reviews/meta?product_id=4');
 
-  beforeAll(async () => {
-    response = await request(app).get('/reviews/meta');
-  });
-
-  it('should respond with a 200 status code', async () => {
-    expect(response.statusCode).toBe(200);
-  });
-
-  it('should respond with text: "success in GET /reviews/meta"', () => {
-    expect(response.text).toBe('success in GET /reviews/meta');
+    expect(response.text).toBe('{"product_id":"4","ratings":{"2":"1","4":"1","5":"1"},"recommended":{"false":"1","true":"2"},"characteristics":{"Fit":{"id":10,"value":"3.6666666666666667"},"Length":{"id":11,"value":"3.6666666666666667"},"Comfort":{"id":12,"value":"3.6666666666666667"},"Quality":{"id":13,"value":"3.6666666666666667"}}}');
   });
 });
 

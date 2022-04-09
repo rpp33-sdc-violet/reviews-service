@@ -5,7 +5,9 @@
   "main": "server/app.js",
   "scripts": {
     "start": "nodemon server/index.js",
-    "test": "jest --detectOpenHandles --forceExit"
+    "test-app": "jest ./server/app.test.js --detectOpenHandles --forceExit",
+    "test-ETL": "jest ./database/ETL.test.js --detectOpenHandles",
+    "test-coverage": "jest --coverage"
   },
   "repository": {
     "type": "git",
