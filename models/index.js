@@ -22,7 +22,7 @@ module.exports = {
         'product', '${productId}',
         'page', ${page},
         'count', ${count},
-        'results', (SELECT json_agg(row_to_json(allReviews)) 
+        'results', (SELECT COALESCE(json_agg(row_to_json(allReviews)), '[]') 
         FROM (
           SELECT review_id, rating, summary, recommend, response, body, date, reviewer_name, helpfulness, reported,
             (SELECT array_to_json(COALESCE (array_agg(row_to_json(allPhotos)), '{}'))
@@ -41,13 +41,14 @@ module.exports = {
         if (err) {
           callback(err);
         } else {
+          console.log('HERE:', res.rows[0]);
           callback(null, res.rows[0].json_build_object);
         }
       });
 
       /* QUERY INVESTIGATION
       const queryReviewWithoutPhotosTEST = `
-        (SELECT json_agg(row_to_json(reviews))
+        (SELECT COALESCE(json_agg(row_to_json(reviews)), '[]')
         FROM (
           SELECT review_id, rating, summary, recommend, body, date, reviewer_name, helpfulness
           FROM review
@@ -140,30 +141,6 @@ module.exports = {
           });
         }
       });
-
-      // pool.query(queryCharacteristics, (err, res) => {
-      //   if (err) {
-      //     console.log('HERE ERR1:', err);
-      //     callback(err);
-      //   } else {
-      //     console.log('INVESTIGATIVE QUERIES1:', res.rows);
-      //     if (res.rows.length === 0) {
-      //       pool.query(queryCharacteristicsNone, (error, response) => {
-      //         if (error) {
-      //           console.log('HERE ERR2:', error);
-      //           callback(error);
-      //         } else {
-      //           console.log('INVESTIGATIVE QUERIES2:', response.rows[0].json_object_agg);
-      //           callback(null, 'test2');
-      //         }
-      //       });
-      //     } else {
-      //       callback(null, 'test1');
-      //     }
-      //     // console.log('QUERYTEXT:', res.rows[0].json_build_object);
-      //     // callback(null, 'test');
-      //   }
-      // });
     },
   },
   helpful: {
