@@ -1,5 +1,6 @@
 const request = require('supertest');
 const app = require('./app');
+const pool = require('../database/index');
 
 describe('GET /', () => {
   let response;
@@ -159,18 +160,27 @@ describe('GET /reviews/meta', () => {
 });
 
 describe('PUT /reviews/:review_id/helpful', () => {
-  let response;
+  it('should update helpfulness for review_id: 30', async () => {
+    const response = await request(app).put('/reviews/30/helpful');
+    expect(response.status).toBe(204);
+    const checkUpdate = await request(app).get('/reviews?product_id=14&page=1&count=6&sort=relevant');
+    expect(checkUpdate.body.results[3].helpfulness).toBe(15);
 
-  beforeAll(async () => {
-    response = await request(app).put('/reviews/1/helpful');
+    if (checkUpdate.body.results[3].helpfulness === 15) {
+      pool.query('UPDATE review SET helpfulness = helpfulness - 1 WHERE review_id=30', (err, res) => {
+        if (err) {
+          console.log('ERROR UNDOING HELPFULNESS IN TEST', err);
+        } else {
+          console.log('SUCCESSFULLY RESET HELPFULNESS IN TEST');
+        }
+      });
+    }
   });
 
-  it('should respond with a 200 status code', async () => {
-    expect(response.statusCode).toBe(200);
-  });
-
-  it('should respond with text: "success in PUT /reviews/:review_id/helpful"', () => {
-    expect(response.text).toBe('success in PUT /reviews/:review_id/helpful');
+  it('should handle error when review_id does not exist', async () => {
+    const response = await request(app).put('/reviews/-1/helpful');
+    expect(response.status).toBe(500);
+    expect(response.text).toBe('Review does not exist - could not update helpfulness');
   });
 });
 

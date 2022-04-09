@@ -164,9 +164,29 @@ module.exports = {
     },
   },
   helpful: {
-    put: () => {
-      console.log('in models helpful PUT');
-      return 'helpful vote inserted';
+    put: (reviewId, callback) => {
+      // reviewId: 30
+      // endpoint: /reviews/30/helpful
+      // helpfulness: 14
+      // check result: SELECT helpfulness FROM review WHERE review_id=30;
+      // undo testing: UPDATE review SET helpfulness = helpfulness - 1 WHERE review_id=30;
+      // error no nonexistent review - /reviews/-1/helpful
+
+      const queryText = `
+        UPDATE review 
+        SET helpfulness = helpfulness + 1 
+        WHERE review_id=${reviewId}
+      `;
+
+      pool.query(queryText, (err, res) => {
+        if (err) {
+          callback(err);
+        } else if (res.rowCount === 0) {
+          callback(null, 'Review does not exist - could not update helpfulness');
+        } else {
+          callback(null, null);
+        }
+      });
     },
   },
   report: {
