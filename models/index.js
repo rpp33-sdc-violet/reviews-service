@@ -70,53 +70,100 @@ module.exports = {
     get: (callback) => {
       console.log('in models meta GET');
       // hardcode data
-      const productId = 2;
-      // ratings: 2: 1, 3: 1, 4: 2, 5: 1,
-      // recommend: false: 2, true: 3
+      const productId = 3;
+      // ratings: 2: 1, 4: 1, 5: 1,
+      // recommend: false: 1, true: 2
       // characteristics:
 
-      const queryText = `
+      // No metadata:
+      // const productId = 3;
+      // ratings: {}
+      // recommended: {}
+      // characteristics: {characteristic_category: {id: #, value: null}}
+
+      const queryRatingsRecommended = `
         SELECT json_build_object(
         'product_id', '${productId}',
-        'ratings', (SELECT json_object_agg(rating, count)
+        'ratings', COALESCE((SELECT json_object_agg(rating, count)
           FROM (SELECT review.rating, COUNT(rating)::text
             FROM review
             WHERE product_id=${productId}
             GROUP BY rating 
-            ORDER BY rating) AS ratings),
-        'recommended', (SELECT json_object_agg(recommend, count)
+            ORDER BY rating) AS ratings), '{}'),
+        'recommended', COALESCE((SELECT json_object_agg(recommend, count)
           FROM (SELECT review.recommend, COUNT(recommend)::text
             FROM review
             WHERE product_id=${productId}
-            GROUP BY recommend) AS recommended)
+            GROUP BY recommend) AS recommended), '{}')
       )`;
 
-      const queryRatings = `
-        SELECT json_object_agg(rating, count)
-        FROM (SELECT review.rating, COUNT(rating)::text
-          FROM review
-          WHERE product_id=${productId}
-          GROUP BY rating 
-          ORDER BY rating) AS ratings
+      const queryCharacteristics = `
+        SELECT * FROM reviews_characteristics  
+        INNER JOIN characteristic
+        ON characteristic.product_id = ${productId}  
+          AND reviews_characteristics.characteristic_id = characteristic.characteristic_id  
       `;
 
-      const queryRecommended = `
-        SELECT json_object_agg(recommend, count)
-        FROM (SELECT review.recommend, COUNT(recommend)::text
-          FROM review
-          WHERE product_id=${productId}
-          GROUP BY recommend) AS recommended
+      const queryCharNone = `
+        SELECT json_object_agg(category, json_build_object('id', id, 'value', null)) FROM (SELECT characteristic_id AS id, category 
+          FROM characteristic
+          WHERE product_id = ${productId}) AS char
       `;
 
-      pool.query(queryText, (err, res) => {
-        if (err) {
-          console.log('HERE ERR:', err);
-          callback(err);
+      pool.query(queryRatingsRecommended, (errRatingsRecommended, resRatingsRecommended) => {
+        if (errRatingsRecommended) {
+          console.log('errRatingsRecommended HERE:', errRatingsRecommended);
+          callback(errRatingsRecommended);
         } else {
-          console.log('HERE:', res.rows[0].json_build_object);
-          callback(null, 'test');
+          console.log('queryRatingsRecommended HERE:', resRatingsRecommended.rows[0].json_build_object);
+          const metadata = resRatingsRecommended.rows[0].json_build_object;
+          pool.query(queryCharacteristics, (errCharacteristics, resCharacteristics) => {
+            if (errCharacteristics) {
+              console.log('errCharacteristics HERE:', errCharacteristics);
+              callback(errCharacteristics);
+            } else {
+              console.log('queryCharacteristics HERE:', resCharacteristics.rows[0]);
+              if (resCharacteristics.rows.length === 0) {
+                pool.query(queryCharNone, (errCharNone, resCharNone) => {
+                  if (errCharNone) {
+                    console.log('errCharNone HERE:', errCharNone);
+                    callback(errCharNone);
+                  } else {
+                    console.log('resCharNone HERE:', resCharNone.rows[0].json_object_agg);
+                    metadata.characteristics = resCharNone.rows[0].json_object_agg;
+                    console.log('metadata HERE:', metadata);
+                    callback(null, 'test what');
+                  }
+                });
+              }
+            }
+          });
         }
       });
+
+      // pool.query(queryCharacteristics, (err, res) => {
+      //   if (err) {
+      //     console.log('HERE ERR1:', err);
+      //     callback(err);
+      //   } else {
+      //     console.log('INVESTIGATIVE QUERIES1:', res.rows);
+      //     if (res.rows.length === 0) {
+      //       pool.query(queryCharacteristicsNone, (error, response) => {
+      //         if (error) {
+      //           console.log('HERE ERR2:', error);
+      //           callback(error);
+      //         } else {
+      //           console.log('INVESTIGATIVE QUERIES2:', response.rows[0].json_object_agg);
+      //           callback(null, 'test2');
+      //         }
+      //       });
+      //     } else {
+      //       callback(null, 'test1');
+      //     }
+      //     // console.log('QUERYTEXT:', res.rows[0].json_build_object);
+      //     // callback(null, 'test');
+      //   }
+      // });
     },
   },
   helpful: {
