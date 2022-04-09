@@ -18,7 +18,7 @@ describe('GET /', () => {
 });
 
 describe('GET /reviews', () => {
-  it('should return reviews data based on specific query parameters', async () => {
+  it('should return reviews data based on specific query parameters for product_id: 2', async () => {
     const response = await request(app).get('/reviews?product_id=2&page=1&count=1&sort=relevant');
     expect(response.status).toEqual(200);
     expect(response.body.product).toEqual('2');
@@ -51,11 +51,61 @@ describe('GET /reviews', () => {
       ]),
     );
   });
-  // test for photos null to be an empty array
-  // test for page 0 (default to 1)
-  // test for count/page defaults
-  // test that reported reviews doesn't show up
-  // test for errors
+
+  it('should sort by helpful', async () => {
+    const response = await request(app).get('/reviews?product_id=2&sort=helpful');
+    expect(response.body.results[0].review_id).toBe(3);
+  });
+
+  it('should sort by newest', async () => {
+    const response = await request(app).get('/reviews?product_id=1&sort=newest');
+    expect(response.body.results[0].review_id).toBe(2);
+  });
+
+  it('should return an empty array when there are NO PHOTOS for a review in product_id: 2', async () => {
+    const response = await request(app).get('/reviews?product_id=2&page=2&count=1&sort=relevant');
+    expect(response.body.results[0].photos).toEqual([]);
+  });
+
+  it('should default to page 1 when no page parameters exists', async () => {
+    const response = await request(app).get('/reviews?product_id=2&count=1&sort=relevant');
+    expect(response.body.page).toBe(1);
+    expect(response.body.results[0].review_id).toBe(5);
+  });
+
+  it('should default to page 1 when if page parameter is 0', async () => {
+    const response = await request(app).get('/reviews?product_id=2&page=0&count=1&sort=relevant');
+    expect(response.body.page).toBe(0);
+    expect(response.body.results[0].review_id).toBe(5);
+  });
+
+  it('should default to count 5 when if no count parameter exists', async () => {
+    const response = await request(app).get('/reviews?product_id=2&page=1&sort=relevant');
+    expect(response.body.count).toBe(5);
+    expect(response.body.results.length).toBe(5);
+  });
+
+  it('should NOT return reported reviews', async () => {
+    const response = await request(app).get('/reviews?product_id=7&sort=helpful');
+    expect(response.body.results.length).toBe(1);
+    expect(response.body.results[0].review_id).toBe(13);
+  });
+
+  it('should return an empty array of results if there are NO REVIEWS', async () => {
+    const response = await request(app).get('/reviews?product_id=3&sort=helpful');
+    expect(response.body.results.length).toBe(0);
+    expect(response.body.results).toEqual([]);
+  });
+
+  it('should handle errors when missing the product_id parameter', async () => {
+    const response = await request(app).get('/reviews');
+    expect(response.status).toBe(500);
+  });
+
+  it('should handle errors when missing a sort parameter', async () => {
+    const response = await request(app).get('/reviews?product_id=1');
+    expect(response.status).toBe(500);
+  });
 });
 
 describe('POST /reviews', () => {
@@ -77,8 +127,20 @@ describe('POST /reviews', () => {
 describe('GET /reviews/meta', () => {
   it('should return correct metadata for product_id: 4', async () => {
     const response = await request(app).get('/reviews/meta?product_id=4');
-
+    expect(response.status).toBe(200);
     expect(response.text).toBe('{"product_id":"4","ratings":{"2":"1","4":"1","5":"1"},"recommended":{"false":"1","true":"2"},"characteristics":{"Fit":{"id":10,"value":"3.6666666666666667"},"Length":{"id":11,"value":"3.6666666666666667"},"Comfort":{"id":12,"value":"3.6666666666666667"},"Quality":{"id":13,"value":"3.6666666666666667"}}}');
+  });
+
+  it('should return correct metadata for product_id: 1', async () => {
+    const response = await request(app).get('/reviews/meta?product_id=1');
+    expect(response.status).toBe(200);
+    expect(response.text).toBe('{"product_id":"1","ratings":{"4":"1","5":"1"},"recommended":{"false":"1","true":"1"},"characteristics":{"Fit":{"id":1,"value":"4.0000000000000000"},"Length":{"id":2,"value":"3.5000000000000000"},"Comfort":{"id":3,"value":"5.0000000000000000"},"Quality":{"id":4,"value":"4.0000000000000000"}}}');
+  });
+
+  it('should return correct metadata when there are NO REVIEWS for product_id: 3', async () => {
+    const response = await request(app).get('/reviews/meta?product_id=3');
+    expect(response.status).toBe(200);
+    expect(response.text).toBe('{"product_id":"3","ratings":{},"recommended":{},"characteristics":{"Fit":{"id":6,"value":null},"Length":{"id":7,"value":null},"Comfort":{"id":8,"value":null},"Quality":{"id":9,"value":null}}}');
   });
 });
 
