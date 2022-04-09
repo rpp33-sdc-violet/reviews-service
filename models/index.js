@@ -70,10 +70,15 @@ module.exports = {
     get: (callback) => {
       console.log('in models meta GET');
       // hardcode data
-      const productId = 3;
+      const productId = 4;
       // ratings: 2: 1, 4: 1, 5: 1,
       // recommend: false: 1, true: 2
-      // characteristics:
+      // characteristics: Fit(10), Length(11), Comfort(12), Quality(13) => 3.66667 avg
+
+      // const productId = 1;
+      // ratings: 4: 1, 5: 1,
+      // recommend: false: 1, true: 1
+      // characteristics: Fit(1): 4, Length(2): 3.5, Comfort(3): 5, Quality(4): 4
 
       // No metadata:
       // const productId = 3;
@@ -98,10 +103,14 @@ module.exports = {
       )`;
 
       const queryCharacteristics = `
-        SELECT * FROM reviews_characteristics  
-        INNER JOIN characteristic
-        ON characteristic.product_id = ${productId}  
-          AND reviews_characteristics.characteristic_id = characteristic.characteristic_id  
+        SELECT json_object_agg(category, json_build_object('id', max))
+        SELECT MAX(characteristic_id), category, AVG(value)
+        FROM (SELECT characteristic.characteristic_id, category, value
+          FROM reviews_characteristics  
+          INNER JOIN characteristic
+          ON characteristic.product_id = ${productId}  
+            AND reviews_characteristics.characteristic_id = characteristic.characteristic_id) AS categoryAverages
+        GROUP BY category 
       `;
 
       const queryCharNone = `
@@ -122,7 +131,7 @@ module.exports = {
               console.log('errCharacteristics HERE:', errCharacteristics);
               callback(errCharacteristics);
             } else {
-              console.log('queryCharacteristics HERE:', resCharacteristics.rows[0]);
+              console.log('queryCharacteristics HERE:', resCharacteristics.rows);
               if (resCharacteristics.rows.length === 0) {
                 pool.query(queryCharNone, (errCharNone, resCharNone) => {
                   if (errCharNone) {
@@ -135,6 +144,8 @@ module.exports = {
                     callback(null, 'test what');
                   }
                 });
+              } else {
+                callback(null, 'test now');
               }
             }
           });
