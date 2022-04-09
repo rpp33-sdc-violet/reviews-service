@@ -125,22 +125,36 @@ describe('POST /reviews', () => {
 });
 
 describe('GET /reviews/meta', () => {
-  it('should return correct metadata for product_id: 4', async () => {
-    const response = await request(app).get('/reviews/meta?product_id=4');
-    expect(response.status).toBe(200);
-    expect(response.text).toBe('{"product_id":"4","ratings":{"2":"1","4":"1","5":"1"},"recommended":{"false":"1","true":"2"},"characteristics":{"Fit":{"id":10,"value":"3.6666666666666667"},"Length":{"id":11,"value":"3.6666666666666667"},"Comfort":{"id":12,"value":"3.6666666666666667"},"Quality":{"id":13,"value":"3.6666666666666667"}}}');
-  });
-
   it('should return correct metadata for product_id: 1', async () => {
     const response = await request(app).get('/reviews/meta?product_id=1');
     expect(response.status).toBe(200);
     expect(response.text).toBe('{"product_id":"1","ratings":{"4":"1","5":"1"},"recommended":{"false":"1","true":"1"},"characteristics":{"Fit":{"id":1,"value":"4.0000000000000000"},"Length":{"id":2,"value":"3.5000000000000000"},"Comfort":{"id":3,"value":"5.0000000000000000"},"Quality":{"id":4,"value":"4.0000000000000000"}}}');
   });
 
+  it('should return correct metadata for product_id: 4', async () => {
+    const response = await request(app).get('/reviews/meta?product_id=4');
+    expect(response.status).toBe(200);
+    expect(response.text).toBe('{"product_id":"4","ratings":{"2":"1","4":"1","5":"1"},"recommended":{"false":"1","true":"2"},"characteristics":{"Fit":{"id":10,"value":"3.6666666666666667"},"Length":{"id":11,"value":"3.6666666666666667"},"Comfort":{"id":12,"value":"3.6666666666666667"},"Quality":{"id":13,"value":"3.6666666666666667"}}}');
+  });
+
   it('should return correct metadata when there are NO REVIEWS for product_id: 3', async () => {
     const response = await request(app).get('/reviews/meta?product_id=3');
     expect(response.status).toBe(200);
-    expect(response.text).toBe('{"product_id":"3","ratings":{},"recommended":{},"characteristics":{"Fit":{"id":6,"value":null},"Length":{"id":7,"value":null},"Comfort":{"id":8,"value":null},"Quality":{"id":9,"value":null}}}');
+    expect(response.body.ratings).toEqual({});
+    expect(response.body.recommended).toEqual({});
+    expect(response.body.characteristics.Fit.id).toBe(6);
+    expect(response.body.characteristics.Fit.value).toBe(null);
+    expect(response.body.characteristics.Length.id).toBe(7);
+    expect(response.body.characteristics.Length.value).toBe(null);
+    expect(response.body.characteristics.Comfort.id).toBe(8);
+    expect(response.body.characteristics.Comfort.value).toBe(null);
+    expect(response.body.characteristics.Quality.id).toBe(9);
+    expect(response.body.characteristics.Quality.value).toBe(null);
+  });
+
+  it('should handle errors when missing the product_id parameter', async () => {
+    const response = await request(app).get('/reviews/meta');
+    expect(response.status).toBe(500);
   });
 });
 
