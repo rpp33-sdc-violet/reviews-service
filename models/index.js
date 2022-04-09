@@ -70,7 +70,7 @@ module.exports = {
     get: (callback) => {
       console.log('in models meta GET');
       // hardcode data
-      const productId = 4;
+      const productId = 3;
       // ratings: 2: 1, 4: 1, 5: 1,
       // recommend: false: 1, true: 2
       // characteristics: Fit(10), Length(11), Comfort(12), Quality(13) => 3.66667 avg
@@ -103,14 +103,15 @@ module.exports = {
       )`;
 
       const queryCharacteristics = `
-        SELECT json_object_agg(category, json_build_object('id', max))
-        SELECT MAX(characteristic_id), category, AVG(value)
+        SELECT json_object_agg(category, json_build_object('id', max, 'value', avg)) FROM
+        (SELECT MAX(characteristic_id), category, AVG(value)::text
         FROM (SELECT characteristic.characteristic_id, category, value
           FROM reviews_characteristics  
           INNER JOIN characteristic
           ON characteristic.product_id = ${productId}  
             AND reviews_characteristics.characteristic_id = characteristic.characteristic_id) AS categoryAverages
-        GROUP BY category 
+        GROUP BY category
+        ORDER BY max) AS productChar
       `;
 
       const queryCharNone = `
@@ -131,7 +132,42 @@ module.exports = {
               console.log('errCharacteristics HERE:', errCharacteristics);
               callback(errCharacteristics);
             } else {
-              console.log('queryCharacteristics HERE:', resCharacteristics.rows);
+              console.log('queryCharacteristics HERE:', resCharacteristics.rows[0].json_object_agg);
+              if (resCharacteristics.rows.length === 0) {
+                pool.query(queryCharNone, (errCharNone, resCharNone) => {
+                  if (errCharNone) {
+                    console.log('errCharNone HERE:', errCharNone);
+                    callback(errCharNone);
+                  } else {
+                    console.log('resCharNone HERE:', resCharNone.rows[0].json_object_agg);
+                    metadata.characteristics = resCharNone.rows[0].json_object_agg;
+                    console.log('metadata HERE-1:', metadata);
+                    callback(null, 'test what');
+                  }
+                });
+              } else {
+                metadata.characteristics = resCharacteristics.rows[0].json_object_agg;
+                console.log('metadata HERE-2:', metadata);
+                callback(null, metadata);
+              }
+            }
+          });
+        }
+      });
+      /*
+      pool.query(queryRatingsRecommended, (errRatingsRecommended, resRatingsRecommended) => {
+        if (errRatingsRecommended) {
+          console.log('errRatingsRecommended HERE:', errRatingsRecommended);
+          callback(errRatingsRecommended);
+        } else {
+          console.log('queryRatingsRecommended HERE:', resRatingsRecommended.rows[0].json_build_object);
+          const metadata = resRatingsRecommended.rows[0].json_build_object;
+          pool.query(queryCharacteristics, (errCharacteristics, resCharacteristics) => {
+            if (errCharacteristics) {
+              console.log('errCharacteristics HERE:', errCharacteristics);
+              callback(errCharacteristics);
+            } else {
+              console.log('queryCharacteristics HERE:', resCharacteristics.rows[0].json_object_agg);
               if (resCharacteristics.rows.length === 0) {
                 pool.query(queryCharNone, (errCharNone, resCharNone) => {
                   if (errCharNone) {
@@ -145,12 +181,14 @@ module.exports = {
                   }
                 });
               } else {
-                callback(null, 'test now');
+                metadata.characteristics = resCharacteristics.rows[0].json_object_agg;
+                console.log('metadata HERE:', metadata);
+                callback(null, metadata);
               }
             }
           });
         }
-      });
+      }); */
     },
   },
   helpful: {
