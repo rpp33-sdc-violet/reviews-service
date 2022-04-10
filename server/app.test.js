@@ -185,17 +185,38 @@ describe('PUT /reviews/:review_id/helpful', () => {
 });
 
 describe('PUT /reviews/:review_id/report', () => {
-  let response;
+  it('should update helpfulness for review_id: 30', async () => {
+    const beforeReported = await request(app).get('/reviews?product_id=14&page=1&count=6&sort=relevant');
+    expect(beforeReported.body.results.length).toBe(5);
 
-  beforeAll(async () => {
-    response = await request(app).put('/reviews/1/report');
+    const response = await request(app).put('/reviews/30/report');
+    expect(response.status).toBe(204);
+
+    const afterReported = await request(app).get('/reviews?product_id=14&page=1&count=6&sort=relevant');
+    expect(afterReported.body.results.length).toBe(4);
+    expect(afterReported.body.results).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          review_id: 30,
+        }),
+      ]),
+    );
+
+    pool.query('UPDATE review SET reported = false WHERE review_id=30', async (err) => {
+      if (err) {
+        console.log('ERROR UNDOING REPORTED IN TEST', err);
+      } else {
+        console.log('SUCCESSFULLY RESET REPORTED IN TEST');
+        const afterReset = await request(app).get('/reviews?product_id=14&page=1&count=6&sort=relevant');
+        expect(afterReset.body.results.length).toBe(5);
+        console.log('AFTER RESET IN ACTUAL TEST:', afterReset.body.results);
+      }
+    });
   });
 
-  it('should respond with a 200 status code', async () => {
-    expect(response.statusCode).toBe(200);
-  });
-
-  it('should respond with text: "success in PUT /reviews/:review_id/report"', () => {
-    expect(response.text).toBe('success in PUT /reviews/:review_id/report');
+  it('should handle error when review_id does not exist', async () => {
+    const response = await request(app).put('/reviews/-1/report');
+    expect(response.status).toBe(500);
+    expect(response.text).toBe('Review does not exist - could not report this review');
   });
 });

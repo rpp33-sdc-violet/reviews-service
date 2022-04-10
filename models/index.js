@@ -190,9 +190,28 @@ module.exports = {
     },
   },
   report: {
-    put: () => {
-      console.log('in models report PUT');
-      return 'reported';
+    put: (reviewId, callback) => {
+      // reviewId: 30
+      // endpoint: /reviews/30/report
+      // check result: SELECT reported FROM review WHERE review_id=30;
+      // undo testing: UPDATE review SET reported = false WHERE review_id=30;
+      // error no nonexistent review - /reviews/-1/report
+
+      const queryText = `
+        UPDATE review 
+        SET reported = true 
+        WHERE review_id=${reviewId}
+      `;
+
+      pool.query(queryText, (err, res) => {
+        if (err) {
+          callback(err);
+        } else if (res.rowCount === 0) {
+          callback(null, 'Review does not exist - could not report this review');
+        } else {
+          callback(null, null);
+        }
+      });
     },
   },
 };

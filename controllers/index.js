@@ -52,11 +52,15 @@ module.exports = {
   },
   report: {
     put: (req, res) => {
-      if (models.report.put() === 'reported') {
-        res.send('success in PUT /reviews/:review_id/report');
-      } else {
-        res.status(500).send('error in PUT /reviews/:review_id/report');
-      }
+      models.report.put(req.params.review_id, (error, noIdFound) => {
+        if (error) {
+          res.status(500).send(error);
+        } else if (noIdFound) {
+          res.status(500).send(noIdFound);
+        } else {
+          res.status(204).send();
+        }
+      });
     },
   },
 };
