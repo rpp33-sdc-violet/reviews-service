@@ -165,12 +165,17 @@ module.exports = {
   },
   helpful: {
     put: (reviewId, callback) => {
+      // TESTING
       // reviewId: 30
       // endpoint: /reviews/30/helpful
-      // helpfulness: 14
+      // Original helpfulness: 14
       // check result: SELECT helpfulness FROM review WHERE review_id=30;
       // undo testing: UPDATE review SET helpfulness = helpfulness - 1 WHERE review_id=30;
       // error no nonexistent review - /reviews/-1/helpful
+
+      // FRONTEND CONNECTION TESTING
+      // review_id: 372722
+      // Original helpfulness: 21
 
       const queryText = `
         UPDATE review 
@@ -191,6 +196,7 @@ module.exports = {
   },
   report: {
     put: (reviewId, callback) => {
+      // TESTING
       // reviewId: 30
       // endpoint: /reviews/30/report
       // check result: SELECT reported FROM review WHERE review_id=30;
