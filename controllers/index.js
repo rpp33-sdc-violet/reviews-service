@@ -17,11 +17,19 @@ module.exports = {
       });
     },
     post: (req, res) => {
-      if (models.reviews.post() === 'reviews data posted') {
-        res.send('success in POST /reviews');
-      } else {
-        res.status(500).send('error in POST /reviews');
-      }
+      models.reviews.post(req.body, (err) => {
+        if (err) {
+          res.status(500).send(err);
+        } else {
+          res.status(201).send();
+        }
+      });
+
+      // if (models.reviews.post() === 'reviews data posted') {
+      //   res.send('success in POST /reviews');
+      // } else {
+      //   res.status(500).send('error in POST /reviews');
+      // }
     },
   },
   meta: {

@@ -61,9 +61,53 @@ module.exports = {
         ) as photos`;
       */
     },
-    post: () => {
-      console.log('in models reviews POST');
-      return 'reviews data posted';
+    post: (bodyParams, callback) => {
+      console.log('in models reviews POST:', bodyParams);
+      // DEFAULTS:
+      // summary - empty string
+      const summary = bodyParams.summary || '';
+      // response - null
+      // helpfulness - 0
+      // reported - false
+      const date = new Date().toISOString();
+
+      // TESTING
+      // CHECK: SELECT * FROM review WHERE product_id=64622;
+      // REMOVE: DELETE FROM review WHERE review_id=;
+
+      // TODO:
+      // https://medium.com/the-journey-learning-to-code-one-day-at-a-time/postgresql-duplicate-key-violates-unique-constraint-5d6eb3b61f7b
+      // ADD THESE SCRIPTS AND INDEXING SCRIPTS TO SCHEMA
+      // CHECK TO SEE IF ADD REVIEW WORKS
+      // ADD PHOTOS
+      // ADD CHARACTERISTICS
+
+      const queryReview = 'INSERT INTO review (product_id, rating, summary, recommend, response, body, date, reviewer_name, helpfulness, email, reported) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING review_id';
+
+      const values = [
+        bodyParams.product_id,
+        bodyParams.rating,
+        summary,
+        bodyParams.recommend,
+        null,
+        bodyParams.body,
+        date,
+        bodyParams.name,
+        0,
+        bodyParams.email,
+        false];
+
+      console.log('VALUES', values);
+
+      pool.query(queryReview, values, (errReview, resReview) => {
+        if (errReview) {
+          console.log('errReview:', errReview);
+          callback(errReview);
+        } else {
+          console.log('resReview-find review_id***:', resReview);
+        }
+      });
+      // callback(null);
     },
   },
   meta: {

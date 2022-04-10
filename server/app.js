@@ -2,6 +2,8 @@ const express = require('express');
 const app = express();
 const db = require('../database/index');
 
+app.use(express.json());
+
 // Router
 const router = require('./routes');
 
