@@ -46,6 +46,16 @@ CREATE TABLE reviews_characteristics (
     ON DELETE CASCADE
 );
 
+CREATE INDEX idx_review_product_id ON review(product_id);
+CREATE INDEX idx_photo_review_id ON photo(review_id);
+CREATE INDEX idx_characteristic_product_id ON characteristic(product_id);
+CREATE INDEX idx_RC_review_id ON reviews_characteristics(review_id);
+CREATE INDEX idx_RC_characteristic_id ON reviews_characteristics(characteristic_id);
+
+SELECT setval('review_review_id_seq', (SELECT MAX(review_id) FROM review));
+SELECT setval('photo_photo_id_seq', (SELECT MAX(photo_id) FROM photo));
+SELECT setval('reviews_characteristics_id_seq', (SELECT MAX(id) FROM reviews_characteristics));
+
 /*  Execute this file from the command line by typing:
  *    psql -d postgres -U sdc < database/schema.sql
  *  to create the database and the tables.*/

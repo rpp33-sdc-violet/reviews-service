@@ -62,25 +62,67 @@ module.exports = {
       */
     },
     post: (bodyParams, callback) => {
-      console.log('in models reviews POST:', bodyParams);
-      // DEFAULTS:
-      // summary - empty string
+      /* **************************** */
+      // HELPER QUERY FUNCTIONS
+      /* **************************** */
+      const insertPhotos = (photos, reviewId, insertPhotosCB) => {
+        // USE: CHECK IF INSERTION IS COMPLETE FOR ALL PHOTOS
+        const numToInsert = photos.length;
+        let insertComplete = 0;
+
+        const queryPhoto = 'INSERT INTO photo (review_id, url) VALUES ($1, $2) RETURNING photo_id';
+
+        photos.forEach((url) => {
+          const photoValues = [reviewId, url];
+          pool.query(queryPhoto, photoValues, (errPhoto, resPhoto) => {
+            if (errPhoto) {
+              callback(errPhoto);
+            } else {
+              insertComplete += 1;
+              // IF ALL INSERTION COMPLETE, THEN INVOKE CB
+              if (numToInsert === insertComplete) {
+                insertPhotosCB();
+              }
+            }
+          });
+        });
+      };
+
+      const insertCharacteristics = (charObj, reviewId, insertCharCB) => {
+        // USE: CHECK IF INSERTION IS COMPLETE FOR ALL CHARACTERISTICS
+        const numToInsert = Object.keys(charObj).length;
+        let insertComplete = 0;
+
+        const queryChar = 'INSERT INTO reviews_characteristics (characteristic_id, review_id, value) VALUES ($1, $2, $3) RETURNING id';
+
+        Object.keys(charObj).forEach((charId) => {
+          const value = charObj[charId];
+          const charValues = [charId, reviewId, value];
+          pool.query(queryChar, charValues, (errChar, resChar) => {
+            if (errChar) {
+              callback(errChar);
+            } else {
+              insertComplete += 1;
+              // IF ALL INSERTION COMPLETE, THEN INVOKE CB
+              if (numToInsert === insertComplete) {
+                insertCharCB();
+              }
+            }
+          });
+        });
+      };
+
+      /* **************************** */
+      // DEFAULTS
+      /* **************************** */
       const summary = bodyParams.summary || '';
-      // response - null
-      // helpfulness - 0
-      // reported - false
       const date = new Date().toISOString();
 
+      /* **************************** */
       // TESTING
-      // CHECK: SELECT * FROM review WHERE product_id=64622;
-      // REMOVE: DELETE FROM review WHERE review_id=;
-
-      // TODO:
-      // https://medium.com/the-journey-learning-to-code-one-day-at-a-time/postgresql-duplicate-key-violates-unique-constraint-5d6eb3b61f7b
-      // ADD THESE SCRIPTS AND INDEXING SCRIPTS TO SCHEMA
-      // CHECK TO SEE IF ADD REVIEW WORKS
-      // ADD PHOTOS
-      // ADD CHARACTERISTICS
+      /* **************************** */
+      // CHECK REVIEW: SELECT * FROM review WHERE review_id=5774953;
+      // REMOVE REVIEW: DELETE FROM review WHERE review_id=5774953;
 
       const queryReview = 'INSERT INTO review (product_id, rating, summary, recommend, response, body, date, reviewer_name, helpfulness, email, reported) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING review_id';
 
@@ -97,17 +139,25 @@ module.exports = {
         bodyParams.email,
         false];
 
-      console.log('VALUES', values);
-
       pool.query(queryReview, values, (errReview, resReview) => {
         if (errReview) {
-          console.log('errReview:', errReview);
           callback(errReview);
         } else {
-          console.log('resReview-find review_id***:', resReview);
+          const reviewId = resReview.rows[0].review_id;
+          // if the review included photos, add to DB
+          if (bodyParams.photos.length > 0) {
+            insertPhotos(bodyParams.photos, reviewId, () => {
+              insertCharacteristics(bodyParams.characteristics, reviewId, () => {
+                callback(null);
+              });
+            });
+          } else {
+            insertCharacteristics(bodyParams.characteristics, reviewId, () => {
+              callback(null);
+            });
+          }
         }
       });
-      // callback(null);
     },
   },
   meta: {
@@ -209,7 +259,9 @@ module.exports = {
   },
   helpful: {
     put: (reviewId, callback) => {
+      /* **************************** */
       // TESTING
+      /* **************************** */
       // reviewId: 30
       // endpoint: /reviews/30/helpful
       // Original helpfulness: 14
@@ -240,7 +292,9 @@ module.exports = {
   },
   report: {
     put: (reviewId, callback) => {
+      /* **************************** */
       // TESTING
+      /* **************************** */
       // reviewId: 30
       // endpoint: /reviews/30/report
       // check result: SELECT reported FROM review WHERE review_id=30;
