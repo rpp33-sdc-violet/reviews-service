@@ -110,18 +110,36 @@ describe('GET /reviews', () => {
 });
 
 describe('POST /reviews', () => {
-  let response;
+  it('should insert review into review, photo, and reviews_characteristics tables', async () => {
+    const beforeInsert = await request(app).get('/reviews?product_id=5&sort=relevant');
+    expect(beforeInsert.body.results.length).toBe(2);
 
-  beforeAll(async () => {
-    response = await request(app).post('/reviews');
-  });
+    const response = await request(app).post('/reviews').send({
+      product_id: 5,
+      rating: 5,
+      summary: 'test-sum',
+      body: 'body-test body-test body-test body-test body-test body-test body-test body-test',
+      recommend: true,
+      name: 'test-POST',
+      photos: [],
+      email: 'test@test.com',
+      characteristics: {
+        215990: 5,
+        215991: 5,
+        215992: 5,
+        215993: 5,
+      },
+    });
+    expect(response.status).toBe(201);
 
-  it('should respond with a 200 status code', async () => {
-    expect(response.statusCode).toBe(200);
-  });
+    const afterInsert = await request(app).get('/reviews?product_id=5&sort=relevant');
+    expect(afterInsert.body.results.length).toBe(3);
 
-  it('should respond with text: "success in POST /reviews"', () => {
-    expect(response.text).toBe('success in POST /reviews');
+    // RESET DATABASE
+    await pool.query('DELETE FROM review WHERE review_id=5774953');
+    await pool.query("SELECT setval('review_review_id_seq', (SELECT MAX(review_id) FROM review))");
+    await pool.query("SELECT setval('photo_photo_id_seq', (SELECT MAX(photo_id) FROM photo))");
+    await pool.query("SELECT setval('reviews_characteristics_id_seq', (SELECT MAX(id) FROM reviews_characteristics))");
   });
 });
 
@@ -170,8 +188,6 @@ describe('PUT /reviews/:review_id/helpful', () => {
       pool.query('UPDATE review SET helpfulness = helpfulness - 1 WHERE review_id=30', (err, res) => {
         if (err) {
           console.log('ERROR UNDOING HELPFULNESS IN TEST', err);
-        } else {
-          console.log('SUCCESSFULLY RESET HELPFULNESS IN TEST');
         }
       });
     }
@@ -206,10 +222,8 @@ describe('PUT /reviews/:review_id/report', () => {
       if (err) {
         console.log('ERROR UNDOING REPORTED IN TEST', err);
       } else {
-        console.log('SUCCESSFULLY RESET REPORTED IN TEST');
         const afterReset = await request(app).get('/reviews?product_id=14&page=1&count=6&sort=relevant');
         expect(afterReset.body.results.length).toBe(5);
-        console.log('AFTER RESET IN ACTUAL TEST:', afterReset.body.results);
       }
     });
   });
