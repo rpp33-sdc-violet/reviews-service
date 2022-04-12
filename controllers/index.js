@@ -3,48 +3,66 @@ const models = require('../models/index');
 module.exports = {
   reviews: {
     get: (req, res) => {
-      models.reviews.get()
-        .then((data) => {
-          console.log('CONTROLLER GET DATA HERE', data);
+      const page = !req.query.page ? 1 : Number(req.query.page);
+      const count = !req.query.count ? 5 : Number(req.query.count);
+      const { sort } = req.query;
+      const productId = req.query.product_id;
+
+      models.reviews.get(page, count, sort, productId, (err, data) => {
+        if (err) {
+          res.status(500).send(err);
+        } else {
           res.send(data);
-        })
-        .catch((error) => {
-          res.status(500).send('error in GET /reviews');
-        });
+        }
+      });
     },
     post: (req, res) => {
-      if (models.reviews.post() === 'reviews data posted') {
-        res.send('success in POST /reviews');
-      } else {
-        res.status(500).send('error in POST /reviews');
-      }
+      models.reviews.post(req.body, (err) => {
+        if (err) {
+          res.status(500).send(err);
+        } else {
+          res.status(201).send();
+        }
+      });
     },
   },
   meta: {
     get: (req, res) => {
-      if (models.meta.get() === 'metadata here') {
-        res.send('success in GET /reviews/meta');
-      } else {
-        res.status(500).send('error in GET /reviews/meta');
-      }
+      const productId = req.query.product_id;
+
+      models.meta.get(productId, (err, data) => {
+        if (err) {
+          res.status(500).send(err);
+        } else {
+          res.send(data);
+        }
+      });
     },
   },
   helpful: {
     put: (req, res) => {
-      if (models.helpful.put() === 'helpful vote inserted') {
-        res.send('success in PUT /reviews/:review_id/helpful');
-      } else {
-        res.status(500).send('error in PUT /reviews/:review_id/helpful');
-      }
+      models.helpful.put(req.params.review_id, (error, noIdFound) => {
+        if (error) {
+          res.status(500).send(error);
+        } else if (noIdFound) {
+          res.status(500).send(noIdFound);
+        } else {
+          res.status(204).send();
+        }
+      });
     },
   },
   report: {
     put: (req, res) => {
-      if (models.report.put() === 'reported') {
-        res.send('success in PUT /reviews/:review_id/report');
-      } else {
-        res.status(500).send('error in PUT /reviews/:review_id/report');
-      }
+      models.report.put(req.params.review_id, (error, noIdFound) => {
+        if (error) {
+          res.status(500).send(error);
+        } else if (noIdFound) {
+          res.status(500).send(noIdFound);
+        } else {
+          res.status(204).send();
+        }
+      });
     },
   },
 };

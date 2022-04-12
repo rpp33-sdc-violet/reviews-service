@@ -2,10 +2,12 @@
   "name": "reviews-service",
   "version": "1.0.0",
   "description": "Reviews API for Project Atelier",
-  "main": "server/index.js",
+  "main": "server/app.js",
   "scripts": {
     "start": "nodemon server/index.js",
-    "test": "jest --detectOpenHandles"
+    "test-app": "jest ./server/app.test.js --detectOpenHandles --forceExit",
+    "test-ETL": "jest ./database/ETL.test.js --detectOpenHandles",
+    "test-coverage": "jest --coverage"
   },
   "repository": {
     "type": "git",
