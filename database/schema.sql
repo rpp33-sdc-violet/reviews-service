@@ -52,9 +52,73 @@ CREATE INDEX idx_characteristic_product_id ON characteristic(product_id);
 CREATE INDEX idx_RC_review_id ON reviews_characteristics(review_id);
 CREATE INDEX idx_RC_characteristic_id ON reviews_characteristics(characteristic_id);
 
+/* AFTER ETL PROCESS IS COMPELTE, RUN THE FOLLOWING:
 SELECT setval('review_review_id_seq', (SELECT MAX(review_id) FROM review));
 SELECT setval('photo_photo_id_seq', (SELECT MAX(photo_id) FROM photo));
 SELECT setval('reviews_characteristics_id_seq', (SELECT MAX(id) FROM reviews_characteristics));
+*/
+
+/* PERFORMANCE TUNING TESTING
+DROP INDEX idx_review_product_id;
+DROP INDEX idx_photo_review_id;
+DROP INDEX idx_characteristic_product_id;
+DROP INDEX idx_RC_review_id;
+DROP INDEX idx_RC_characteristic_id;
+
+GET /reviews
+EXPLAIN ANALYZE SELECT json_build_object(
+        'product', '979331',
+        'page', 1,
+        'count', 10,
+        'results', (SELECT COALESCE(json_agg(row_to_json(allReviews)), '[]') 
+        FROM (
+          SELECT review_id, rating, summary, recommend, response, body, date, reviewer_name, helpfulness, reported,
+            (SELECT COALESCE(array_to_json(array_agg(row_to_json(allPhotos))), '[]')
+              FROM (
+                SELECT photo_id AS id, url FROM photo WHERE review_id=review.review_id
+              ) allPhotos
+            ) AS photos  
+          FROM review 
+          WHERE product_id=979331 AND reported=false
+          ORDER BY helpfulness DESC
+          LIMIT 1
+          OFFSET 0
+        ) AS allReviews)); 
+
+EXPLAIN ANALYZE INSERT INTO review (product_id, rating, summary, recommend, response, body, date, reviewer_name, helpfulness, email, reported) VALUES (910882, 5, 'good', true, 'glad to hear', 'lots of room', 'date-test', 'tester', 0, 'test@test.com', false) RETURNING review_id;
+
+EXPLAIN ANALYZE INSERT INTO photo (review_id, url) VALUES (5654377, 'www.test.com') RETURNING photo_id;
+
+EXPLAIN ANALYZE INSERT INTO reviews_characteristics (characteristic_id, review_id, value) VALUES (3347676, 5774952, 5) RETURNING id;
+
+EXPLAIN ANALYZE SELECT json_build_object(
+        'product_id', '963227',
+        'ratings', COALESCE((SELECT json_object_agg(rating, count)
+          FROM (SELECT review.rating, COUNT(rating)::text
+            FROM review
+            WHERE product_id=963227
+            GROUP BY rating 
+            ORDER BY rating) AS ratings), '{}'),
+        'recommended', COALESCE((SELECT json_object_agg(recommend, count)
+          FROM (SELECT review.recommend, COUNT(recommend)::text
+            FROM review
+            WHERE product_id=963227
+            GROUP BY recommend) AS recommended), '{}'),
+        'characteristics', COALESCE((SELECT json_object_agg(category, json_build_object('id', max, 'value', avg)) 
+          FROM (SELECT MAX(characteristic_id), category, AVG(value)::text
+            FROM (SELECT characteristic.characteristic_id, category, value
+              FROM reviews_characteristics  
+              INNER JOIN characteristic
+              ON characteristic.product_id = 963227  
+                AND reviews_characteristics.characteristic_id = characteristic.characteristic_id) AS categoryAverages
+              GROUP BY category
+              ORDER BY max) AS productChar),
+          (SELECT json_object_agg(category, json_build_object('id', id, 'value', null))    
+            FROM (SELECT characteristic_id AS id, category 
+              FROM characteristic
+              WHERE product_id = 963227) AS char))
+        );
+*/
 
 /*  Execute this file from the command line by typing:
  *    psql -d postgres -U sdc < database/schema.sql
