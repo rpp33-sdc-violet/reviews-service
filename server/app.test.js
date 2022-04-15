@@ -121,7 +121,7 @@ describe('POST /reviews', () => {
       body: 'body-test body-test body-test body-test body-test body-test body-test body-test',
       recommend: true,
       name: 'test-POST',
-      photos: [],
+      photos: ['url-test', 'url-test'],
       email: 'test@test.com',
       characteristics: {
         215990: 5,
