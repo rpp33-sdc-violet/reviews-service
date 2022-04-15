@@ -6,12 +6,11 @@ import { sleep, check } from 'k6';
 import { randomIntBetween } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js';
 
 export const options = {
-  vus: 1,
+  vus: 300,
   duration: '30s',
 };
 
 export default () => {
-  // console.log('random integer:', randomIntBetween(1, 10));
   const getReviewRelevant = http.get(`http://localhost:8080/reviews?product_id=${randomIntBetween(900010, 1000011)}&sort=relevant`);
   check(getReviewRelevant, { 'getReviewRelevant status was 200': (r) => r.status === 200 });
 
