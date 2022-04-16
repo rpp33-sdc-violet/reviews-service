@@ -184,13 +184,11 @@ describe('PUT /reviews/:review_id/helpful', () => {
     const checkUpdate = await request(app).get('/reviews?product_id=14&page=1&count=6&sort=relevant');
     expect(checkUpdate.body.results[3].helpfulness).toBe(15);
 
-    if (checkUpdate.body.results[3].helpfulness === 15) {
-      pool.query('UPDATE review SET helpfulness = helpfulness - 1 WHERE review_id=30', (err, res) => {
-        if (err) {
-          console.log('ERROR UNDOING HELPFULNESS IN TEST', err);
-        }
-      });
-    }
+    pool.query('UPDATE review SET helpfulness = 14 WHERE review_id=30', (err, res) => {
+      if (err) {
+        console.log('ERROR UNDOING HELPFULNESS IN TEST', err);
+      }
+    });
   });
 
   it('should handle error when review_id does not exist', async () => {
@@ -201,7 +199,7 @@ describe('PUT /reviews/:review_id/helpful', () => {
 });
 
 describe('PUT /reviews/:review_id/report', () => {
-  it('should update helpfulness for review_id: 30', async () => {
+  it('should update reported for review_id: 30', async () => {
     const beforeReported = await request(app).get('/reviews?product_id=14&page=1&count=6&sort=relevant');
     expect(beforeReported.body.results.length).toBe(5);
 
