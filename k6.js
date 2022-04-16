@@ -5,28 +5,43 @@ import { sleep, check } from 'k6';
 /* eslint-disable-next-line */
 import { randomIntBetween } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js';
 
+// export const options = {
+//   vus: 150,
+//   duration: '30s',
+// };
+
 export const options = {
-  vus: 300,
-  duration: '30s',
+  scenarios: {
+    constant_request_rate: {
+      executor: 'constant-arrival-rate',
+      rate: 1400, // point of stress
+      timeUnit: '1s',
+      duration: '30s',
+      preAllocatedVUs: 20,
+      // increasing VUs up to 10000 yielded lower RPS and p(95) response time of 8s
+      // see engineering journal for more details
+      maxVUs: 1500,
+    },
+  },
 };
 
 export default () => {
-  const getReviewRelevant = http.get(`http://localhost:8080/reviews?product_id=${randomIntBetween(900010, 1000011)}&sort=relevant`);
+  const getReviewRelevant = http.get(`http://localhost:8080/reviews_test?product_id=${randomIntBetween(900010, 1000011)}&sort=relevant`);
   check(getReviewRelevant, { 'getReviewRelevant status was 200': (r) => r.status === 200 });
 
-  const getReviewNewest = http.get(`http://localhost:8080/reviews?product_id=${randomIntBetween(900010, 1000011)}&sort=newest`);
+  const getReviewNewest = http.get(`http://localhost:8080/reviews_test?product_id=${randomIntBetween(900010, 1000011)}&sort=newest`);
   check(getReviewNewest, { 'getReviewNewest status was 200': (r) => r.status === 200 });
 
-  const getReviewHelpful = http.get(`http://localhost:8080/reviews?product_id=${randomIntBetween(900010, 1000011)}&sort=helpful`);
+  const getReviewHelpful = http.get(`http://localhost:8080/reviews_test?product_id=${randomIntBetween(900010, 1000011)}&sort=helpful`);
   check(getReviewHelpful, { 'getReviewHelpful status was 200': (r) => r.status === 200 });
 
-  const getMetadata = http.get(`http://localhost:8080/reviews/meta?product_id=${randomIntBetween(900010, 1000011)}`);
+  const getMetadata = http.get(`http://localhost:8080/reviews_test/meta?product_id=${randomIntBetween(900010, 1000011)}`);
   check(getMetadata, { 'getMetadata status was 200': (r) => r.status === 200 });
 
-  const putHelpful = http.put('http://localhost:8080/reviews/5515304/helpful');
+  const putHelpful = http.put(`http://localhost:8080/reviews_test/${randomIntBetween(900010, 1000011)}/helpful`);
   check(putHelpful, { 'putHelpful status was 204': (r) => r.status === 204 });
 
-  const putReport = http.put('http://localhost:8080/reviews/5515304/report');
+  const putReport = http.put(`http://localhost:8080/reviews_test/${randomIntBetween(900010, 1000011)}/report`);
   check(putReport, { 'putReport status was 204': (r) => r.status === 204 });
 
   const payload = JSON.stringify({
@@ -52,17 +67,8 @@ export default () => {
     },
   };
 
-  const postReivew = http.post('http://localhost:8080/reviews', payload, params);
+  const postReivew = http.post('http://localhost:8080/reviews_test', payload, params);
   check(postReivew, { 'postReivew status was 201': (r) => r.status === 201 });
 
   sleep(1);
 };
-
-/* manual teardown
-UPDATE review SET helpfulness = 29 WHERE review_id=5515304;
-UPDATE review SET reported = false WHERE review_id=5515304;
-DELETE FROM review WHERE reviewer_name = 'test-POST';
-SELECT setval('review_review_id_seq', (SELECT MAX(review_id) FROM review));
-SELECT setval('photo_photo_id_seq', (SELECT MAX(photo_id) FROM photo));
-SELECT setval('reviews_characteristics_id_seq', (SELECT MAX(id) FROM reviews_characteristics));
-*/
