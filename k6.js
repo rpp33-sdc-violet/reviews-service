@@ -14,7 +14,7 @@ export const options = {
   scenarios: {
     constant_request_rate: {
       executor: 'constant-arrival-rate',
-      rate: 1400, // point of stress
+      rate: 1, // point of stress
       timeUnit: '1s',
       duration: '30s',
       preAllocatedVUs: 20,
@@ -45,7 +45,7 @@ export default () => {
   check(putReport, { 'putReport status was 204': (r) => r.status === 204 });
 
   const payload = JSON.stringify({
-    product_id: 5,
+    product_id: randomIntBetween(900010, 1000011),
     rating: 5,
     summary: 'test-sum',
     body: 'body-test body-test body-test body-test body-test body-test body-test body-test',
