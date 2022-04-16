@@ -1,4 +1,6 @@
 const models = require('../models/index');
+const realPool = require('../database/index');
+const testPool = require('../database/index-test');
 
 module.exports = {
   reviews: {
@@ -7,8 +9,9 @@ module.exports = {
       const count = !req.query.count ? 5 : Number(req.query.count);
       const { sort } = req.query;
       const productId = req.query.product_id;
+      const pool = req.baseUrl === '/reviews_test' ? testPool : realPool;
 
-      models.reviews.get(page, count, sort, productId, (err, data) => {
+      models.reviews.get(pool, page, count, sort, productId, (err, data) => {
         if (err) {
           res.status(500).send(err);
         } else {
@@ -17,7 +20,9 @@ module.exports = {
       });
     },
     post: (req, res) => {
-      models.reviews.post(req.body, (err) => {
+      const pool = req.baseUrl === '/reviews_test' ? testPool : realPool;
+
+      models.reviews.post(pool, req.body, (err) => {
         if (err) {
           res.status(500).send(err);
         } else {
@@ -29,8 +34,9 @@ module.exports = {
   meta: {
     get: (req, res) => {
       const productId = req.query.product_id;
+      const pool = req.baseUrl === '/reviews_test' ? testPool : realPool;
 
-      models.meta.get(productId, (err, data) => {
+      models.meta.get(pool, productId, (err, data) => {
         if (err) {
           res.status(500).send(err);
         } else {
@@ -41,7 +47,9 @@ module.exports = {
   },
   helpful: {
     put: (req, res) => {
-      models.helpful.put(req.params.review_id, (error, noIdFound) => {
+      const pool = req.baseUrl === '/reviews_test' ? testPool : realPool;
+
+      models.helpful.put(pool, req.params.review_id, (error, noIdFound) => {
         if (error) {
           res.status(500).send(error);
         } else if (noIdFound) {
@@ -54,7 +62,9 @@ module.exports = {
   },
   report: {
     put: (req, res) => {
-      models.report.put(req.params.review_id, (error, noIdFound) => {
+      const pool = req.baseUrl === '/reviews_test' ? testPool : realPool;
+
+      models.report.put(pool, req.params.review_id, (error, noIdFound) => {
         if (error) {
           res.status(500).send(error);
         } else if (noIdFound) {

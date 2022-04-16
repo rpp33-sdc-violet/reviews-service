@@ -7,7 +7,8 @@
     "start": "nodemon server/index.js",
     "test-app": "jest ./server/app.test.js --detectOpenHandles --forceExit",
     "test-ETL": "jest ./database/ETL.test.js --detectOpenHandles",
-    "test-coverage": "jest --coverage"
+    "test-coverage": "jest --coverage",
+    "stress-test": "k6 run k6.js"
   },
   "repository": {
     "type": "git",

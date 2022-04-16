@@ -1,9 +1,6 @@
-// import database here
-const pool = require('../database/index');
-
 module.exports = {
   reviews: {
-    get: (page, count, sort, productId, callback) => {
+    get: (pool, page, count, sort, productId, callback) => {
       const offsetPage = page === 0 ? 1 : page;
       const limit = count;
       const offset = (offsetPage - 1) * count;
@@ -61,7 +58,7 @@ module.exports = {
         ) as photos`;
       */
     },
-    post: (bodyParams, callback) => {
+    post: (pool, bodyParams, callback) => {
       /* **************************** */
       // HELPER QUERY FUNCTIONS
       /* **************************** */
@@ -161,7 +158,7 @@ module.exports = {
     },
   },
   meta: {
-    get: (productId, callback) => {
+    get: (pool, productId, callback) => {
       const queryText = `
         SELECT json_build_object(
         'product_id', '${productId}',
@@ -258,7 +255,7 @@ module.exports = {
     },
   },
   helpful: {
-    put: (reviewId, callback) => {
+    put: (pool, reviewId, callback) => {
       /* **************************** */
       // TESTING
       /* **************************** */
@@ -291,7 +288,7 @@ module.exports = {
     },
   },
   report: {
-    put: (reviewId, callback) => {
+    put: (pool, reviewId, callback) => {
       /* **************************** */
       // TESTING
       /* **************************** */
