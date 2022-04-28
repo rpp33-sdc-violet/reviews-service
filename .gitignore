@@ -102,3 +102,6 @@ dist
 
 # TernJS port file
 .tern-port
+
+# New Relic Config file
+newrelic.js
