@@ -83,9 +83,53 @@ Project Atelier's Reviews API Service is responsible for CRUD operations pertain
     ]
 }
 ```
-
   
   ### Get Review Metadata
+  Returns review metadata for a given product.
+  
+  `GET /reviews/meta`
+  
+  Query Parameters
+  
+  | Parameter	 | Type      | Description                                               |
+  | ---------- | :-------: | --------------------------------------------------------- |
+  | product_id |  integer  | Required ID of the product for which data should be returned |
+
+  Response: `Status: 200 OK`
+
+```json
+{
+    "product_id": "71700",
+    "ratings": {
+        "2": "1",
+        "4": "1",
+        "5": "1"
+    },
+    "recommended": {
+        "false": "1",
+        "true": "2"
+    },
+    "characteristics": {
+        "Fit": {
+            "id": 240591,
+            "value": "3.6666666666666667"
+        },
+        "Length": {
+            "id": 240592,
+            "value": "3.6666666666666667"
+        },
+        "Comfort": {
+            "id": 240593,
+            "value": "3.6666666666666667"
+        },
+        "Quality": {
+            "id": 240594,
+            "value": "3.6666666666666667"
+        }
+    }
+}
+```
+
   ### Add a Review
   ### Mark Review as Helpful
   ### Report Review
