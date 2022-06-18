@@ -1,5 +1,5 @@
 # Reviews API Service
-Project Atelier's Reviews API Service is responsible for CRUD operations pertaining to data for Ratings and Reviews.
+Project Atelier's Reviews API Service is responsible for CRUD operations on data for Ratings and Reviews. Due to increased demands of production traffic, it replaced the existing API with a back end system design that can support the full data set and scaled to 5000 RPS with a latency of < 10ms and 0% error rate, a 270% increase in throughput.
 
 ## Table of Contents
   - <a href='#usage'>Usage</a>
@@ -13,7 +13,7 @@ Project Atelier's Reviews API Service is responsible for CRUD operations pertain
   
   `GET /reviews/`
   
-  Query Parameters
+  *Query Parameters*
   
 | Parameter	 | Type      | Description                                               |
 | ---------- | :-------: | --------------------------------------------------------- |
@@ -89,7 +89,7 @@ Project Atelier's Reviews API Service is responsible for CRUD operations pertain
   
   `GET /reviews/meta`
   
-  Query Parameters
+  *Query Parameters*
   
   | Parameter	 | Type      | Description                                               |
   | ---------- | :-------: | --------------------------------------------------------- |
@@ -135,7 +135,8 @@ Project Atelier's Reviews API Service is responsible for CRUD operations pertain
   
   `POST /reviews`
   
-  Body Parameters
+  *Body Parameters*
+  
 | Parameter	| Type |	Description |
 | ---------- | :-------: | --------------------------------------------------------- |
 |product_id     	| integer	| Required ID of the product to post the review for |
@@ -155,7 +156,7 @@ Project Atelier's Reviews API Service is responsible for CRUD operations pertain
   
   `PUT /reviews/:review_id/helpful`
   
-  Parameters
+  *Parameters*
   
   | Parameter	| Type |	Description |
   | ---------- | :-------: | --------------------------------------------------------- |
@@ -169,7 +170,7 @@ Response: `Status: 204 NO CONTENT`
   
   `PUT /reviews/:review_id/report`
   
-  Parameters
+  *Parameters*
  
 | Parameter |	Type |	Description |
 | ---------- | :-------: | --------------------------------------------------------- |
