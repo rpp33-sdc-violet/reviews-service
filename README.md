@@ -27,4 +27,4 @@ Project Atelier's Reviews API Service is responsible for CRUD operations pertain
 ## Other Services
 Please reference the Products and Questions & Answers API Services that make up the Project Atelier API:
   - <a href='https://github.com/rpp33-sdc-violet/Overview'>Products</a> by Neen Aroonrerk
-  - <a href='https://github.com/rpp33-sdc-violet/qa'>Questions & Answers</a> by Thao Nguyen
+  - <a href='https://github.com/rpp33-sdc-violet/questions-answers'>Questions & Answers</a> by Thao Nguyen
