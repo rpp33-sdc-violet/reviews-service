@@ -11,6 +11,9 @@ Project Atelier's Reviews API Service is responsible for CRUD operations on data
 ## System Design
   ### Architecture
   ![Screen Shot 2022-07-05 at 11 48 10 PM](https://user-images.githubusercontent.com/89096566/177464964-a996a152-6016-40fe-ad20-e6fe62c7573f.jpg)
+  
+  ### Stress Test Results
+![Screen Shot 2022-07-06 at 12 08 42 AM](https://user-images.githubusercontent.com/89096566/177466303-973fc7eb-6aaa-4390-8dca-508d91fb03d3.jpg)
 
   ### Tech Stack
   - Node.js
@@ -18,6 +21,7 @@ Project Atelier's Reviews API Service is responsible for CRUD operations on data
   - PostgreSQL
   - NGINX
   - AWS EC2
+  - Jest
   - SuperTest
   - k6
   - Loader.io
