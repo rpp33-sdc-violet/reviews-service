@@ -2,11 +2,27 @@
 Project Atelier's Reviews API Service is responsible for CRUD operations on data for Ratings and Reviews. Due to increased demands of production traffic, it replaced the existing API with a back end system design that can support the full data set and scaled to 5000 RPS with a latency of < 10ms and 0% error rate, a 270% increase in throughput.
 
 ## Table of Contents
+  - <a href='system-design'>System Design</a>
   - <a href='#usage'>Usage</a>
   - <a href='#installation'>Installation</a>
   - <a href='#other-services'>Other Services</a>
 
 ---
+## System Design
+  ### Architecture
+  ![Screen Shot 2022-07-05 at 11 48 10 PM](https://user-images.githubusercontent.com/89096566/177464964-a996a152-6016-40fe-ad20-e6fe62c7573f.jpg)
+
+  ### Tech Stack
+  - Node.js
+  - Express
+  - PostgreSQL
+  - NGINX
+  - AWS EC2
+  - SuperTest
+  - k6
+  - Loader.io
+  - New Relic
+  
 ## Usage
   ### List Reviews
   Returns a list of reviews for a particular product. This list does not include any reported reviews.
