@@ -1,5 +1,5 @@
 # Reviews API Service
-Project Atelier's Reviews API Service is responsible for CRUD operations on data for Ratings and Reviews. Due to increased demands of production traffic, it replaced the existing API with a back end system design that can support the full data set and scaled to 5000 RPS with a latency of < 10ms and 0% error rate, a 270% increase in throughput.
+Project Atelier's Reviews API Service is responsible for CRUD operations on data for Ratings and Reviews. Due to increased demands of production traffic, it replaced the existing API with a back end system design that can support the full data set and scaled to 5000 RPS with a latency of < 10ms and 0% error rate, a 400% increase in throughput.
 
 ## Table of Contents
   - <a href='system-design'>System Design</a>
